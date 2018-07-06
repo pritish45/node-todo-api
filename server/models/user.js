@@ -8,6 +8,3 @@ var User=mongoose.model('Users',{
     minlength:1,
   }
 });
-
-
-module.exports={User};
