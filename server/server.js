@@ -63,7 +63,7 @@ app.delete('/todos/:id',(req,res)=>{
       {
         return res.status(404).send("Id Not Found");
       }
-      res.send(todos);
+      res.send({todos});
   }).catch((e)=>{
     res.status(400).send();
   });
