@@ -1,5 +1,6 @@
 var express=require('express');
 var bodyParser=require('body-parser');
+const _=require('lodash');
 
 
 var{mongoose}=require('./db/mongoose');
@@ -55,10 +56,10 @@ app.get('/todos/:id',(req,res)=>{
 
 app.delete('/todos/:id',(req,res)=>{
   var id=req.params.id;
-  if(!ObjectID.isValid(id)){
-    return res.status(404).send('Object Id is not valid');
-  }
   Todo.findByIdAndRemove(id).then((todos)=>{
+    if(!ObjectID.isValid(id)){
+      return res.status(404).send('Object Id is not valid');
+    }
       if(!todos)
       {
         return res.status(404).send("Id Not Found");
@@ -67,6 +68,39 @@ app.delete('/todos/:id',(req,res)=>{
   }).catch((e)=>{
     res.status(400).send();
   });
+});
+
+app.patch('/todos/:id',(req,res)=>{
+  var id=req.params.id;
+  var body = _.pick(req.body,['text','completed']);
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send('Object Id is not valid');
+  }
+  if(_.isBoolean(body.completed)&&body.completed){
+    body.completedAt=new Date().getTime();
+  }
+  else{
+    body.completed=false;
+    body.completedAt=null;
+  }
+
+  Todo.findByIdAndUpdate(id,
+    {
+      $set:body
+    },
+    {
+      new:true,
+      //similar to return original = false
+    }
+  ).then((todos)=>{
+      if(!todos)
+    {
+      return res.status(404).send("Id Not Found");
+    }
+    res.send({todos});
+  }).catch((e)=>{
+    res.status(400).send();
+    });
 });
 
 app.listen(port,()=>{
